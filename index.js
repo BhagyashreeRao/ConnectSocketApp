@@ -19,7 +19,7 @@ app.get('/', function(req, res){
 
 
 app.get('/chatroom',function(req,res){
-  res.sendFile('/chatroom.html');
+  res.sendFile(__dirname+'/chatroom.html');
 
 });
 
