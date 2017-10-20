@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+  <head>
+    <title>chat</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial;
+      background-color:#49274A  }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages li:nth-child(even) { background: white; }
+      .btn{
+      background-color:#FD5F00;
+      color:white;      
+    }
+  
+.header{
+    position:fixed;  
+    width:100%;
+    height:15vh;
+    text-align: center;
+    background-color: white;
+    border-bottom: #FD5F00 solid 5px;
+    color: #49274A;
+    top:0px;
+    z-index: 2;
+
+}
+.section{
+    width: 90%;
+    margin-top: 15vh;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10vh;
+}
+#logSection{
+
+  background-color: #696969;
+  color: white;
+}
+#logout{
+  margin-top: 20px;
+  margin-bottom: 10px;
+ 
+
+}
+#send{
+  height:10vh;
+}
+ .btn:hover,
+ .btn:active
+{
+background-color:#FD5F00;
+color:#49274A;
+} 
+
+hr { 
+    display: block;
+    width: 80%;
+    margin-top: 0.5em;
+    margin-bottom: 2em;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: inset;
+    border-width: 1px;
+    color:black;
+    
+} 
+
+  </style>
+  </head>
+  <body>
+  <header class="header"> <h1> <span class="glyphicon glyphicon-group" style="color:#67C8FF;"></span>ConnecT Chatroom
+<span class="glyphicon glyphicon-link" style="color:#FD5F00;"></span></h1>
+</header>
+  <div class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-9 col-md-9">
+    <ul id="messages">
+      <li>
+          <center><button id="load" class="w3-button w3-circle w3-teal"><span class="glyphicon glyphicon-chevron-up"></span></button></center>
+      </li>
+    </ul>
+    </div>
+    <div id="logSection" class="col-lg-3 col-md-3">
+    <div class="text-right">
+    <button id="logout" class="btn">Logout</button>
+    </div>
+    <hr>
+  <center>  <p>Chatroom logs</p></center>
+    <ul id="logs">
+    </ul>
+    </div>
+
+    </div>
+    </div>
+
+    </div>
+    <form id="send" action="">
+      <input id="m" autocomplete="off" placeholder="Type yor message here.." /><button class="btn">Send</button>
+    </form>
+    
+    <script src="http://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      
+      var socket = io();
+      var count=1;
+      var path=$(location).attr('href');
+      console.log(path);
+      var res1=path.split("?");
+      var res2=(res1[res1.length-1]);
+      var res3=res2.split("&");
+      var res4=res3[res3.length-2];
+      var res5=res4.split("=");
+      var name=res5[res5.length-1];
+      console.log(name);
+      var typeFlag=false;
+      if(name!=null){
+            socket.emit('user',name);
+      }
+      if(name==null || name==undefined || name=='')
+      {
+            name='guest'+Math.floor((Math.random() * 1000));
+            
+            console.log(name);
+            socket.emit('user',name);
+
+      }      
+      $('form').submit(function(){
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+      $('#load').click(function(){
+        socket.emit('loadMore');
+        $('#load').hide();
+      });
+
+  $('#m').keydown(function(){
+        //if typing not set true
+        if(typeFlag==false)
+        {
+          typeFlag=true;
+          //Emit to server that user is typing
+          socket.emit('typing');
+          //Set timeout to check after 2 seconds if user is still typing
+          typingTimeout=setTimeout(notTyping,2000);
+        }
+        else
+        {
+          //Clear previous timeout
+          clearTimeout(typingTimeout);
+
+          //Set new timeout
+          typingTimeout=setTimeout(notTyping,2000);
+        }
+        
+      });
+
+      socket.on('chat message', function(msg){
+        $('#messages').append($('<li>').text(msg));
+      });
+
+      socket.on('log message', function(logmsg)
+        {
+          $('#logs').append($('<li>').text(logmsg));
+        });
+
+        $('#logout').click(function(){
+        socket.emit('logout');
+        $(location).attr('href', '/');
+      });
+    </script>
+  </body>
+</html>
