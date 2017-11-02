@@ -37,11 +37,3 @@ To install this on your system download or clone the repository. Install all dep
     Start MongoDB in the background.
     Launch http://localhost:3000 in a browser.
     Enter any username and password and start chatting.
-
-
-# Built with
-
-    NodeJS.
-    ExpressJS.
-    MongoDB.
-    Socket.IO.
